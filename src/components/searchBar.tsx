@@ -51,18 +51,18 @@ export default function SearchComponent() {
   };
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center space-x-4">
+    <div className="">
+      <div className="flex items-center space-x-2">
         <input
           type="text"
           value={playerId}
           onChange={(e) => setPlayerId(e.target.value)}
           placeholder="Enter Player ID"
-          className="border border-gray-300 rounded px-4 py-2"
+          className="bg-transparent border border-gray-400 text-black dark:text-white rounded-lg px-1.5 py-1 outline-none"
         />
         <button
           onClick={handleSearch}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="bg-transparent border border-gray-400 dark:text-white px-2 py-1 rounded-lg hover:bg-gray-500 hover:text-white"  
         >
           Search
         </button>

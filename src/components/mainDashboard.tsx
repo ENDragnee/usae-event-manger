@@ -22,7 +22,7 @@ export default function DashboardPage() {
       </header>
 
       <Tabs defaultValue="schedule" className="space-y-4">
-        <TabsList className="grid grid-cols-4 md:grid-cols-4 gap-4">
+        <TabsList className="grid grid-cols-3 md:grid-cols-3 gap-4 w-[70%] mx-auto">
           <TabsTrigger value="tournament">Tournament</TabsTrigger>
           <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
           <TabsTrigger value="daily">Daily Program</TabsTrigger>
