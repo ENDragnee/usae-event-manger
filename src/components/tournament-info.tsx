@@ -59,7 +59,7 @@ export function TournamentInfo({ matches = [] }: TournamentInfoProps) {
                 </div>
                 <div className="mt-4 flex items-center justify-between">
                   <span className="text-sm font-medium">Status</span>
-                  <Badge variant="success">Completed</Badge>
+                  <Badge variant="default">Completed</Badge>
                 </div>
               </div>
             </CardContent>

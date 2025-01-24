@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useToast } from "@/hooks/use-toast"
 
-export function ResultInput({ match }) {
+export function ResultInput({ match }: any) {
   const [result, setResult] = useState({})
   const { toast } = useToast()
 
