@@ -1,32 +1,29 @@
-"use client"
+"use client";
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface Event {
-  id: string
-  title: string
-  date: string
-  time: string
-  type: string
-  description: string
-  location: string
+interface Metadata {
+  type: string;
+  date: string;
+  startTime: string;
+  endTime: string;
 }
 
-const events: Event[] = [
-  {
-    id: "1",
-    title: "Basketball Tournament - Semi Finals",
-    date: "2024-01-24",
-    time: "14:00",
-    type: "Tournament",
-    description: "Semi-final match against Team Eagles. Winner advances to the finals.",
-    location: "Main Court",
-  },
-]
+interface Event {
+  _id: { $oid: string };
+  PlayersId: { $oid: string }[];
+  Result: { PID: { $oid: string } }[];
+  Status: string;
+  metadata: Metadata;
+}
 
-export function UpcomingEvents() {
+interface UpcomingEventsProps {
+  matches: Event[];
+}
+
+export function UpcomingEvents({ matches }: UpcomingEventsProps) {
   return (
     <Card className="bg-card text-card-foreground">
       <CardHeader>
@@ -34,32 +31,52 @@ export function UpcomingEvents() {
       </CardHeader>
       <CardContent>
         <Accordion type="single" collapsible className="w-full">
-          {events.map((event) => (
-            <AccordionItem key={event.id} value={event.id}>
-              <AccordionTrigger className="hover:no-underline">
-                <div className="flex items-center gap-4">
-                  <div className="flex flex-col items-start text-left">
-                    <div className="font-semibold">{event.title}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {new Date(event.date).toLocaleDateString()} at {event.time}
+          {matches.map((event) => {
+            const formattedDate = event.metadata.date
+              ? new Date(event.metadata.date).toLocaleDateString(undefined, {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })
+              : "Date not available";
+
+            const startTime = event.metadata.startTime || "Time not available";
+
+            return (
+              <AccordionItem key={event._id.$oid} value={event._id.$oid}>
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col items-start text-left">
+                      <div className="font-semibold">{event.metadata.type}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {formattedDate} at {startTime}
+                      </div>
+                    </div>
+                    <Badge variant="secondary">{event.Status}</Badge>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-2 pt-2">
+                    <p className="text-sm text-muted-foreground">
+                      Event Status: <strong>{event.Status}</strong>
+                    </p>
+                    <div className="text-sm">
+                      <span className="font-semibold">Players:</span>{" "}
+                      {event.PlayersId.map((player) => player.$oid).join(", ")}
+                    </div>
+                    <div className="text-sm">
+                      <span className="font-semibold">Results:</span>{" "}
+                      {event.Result.map((result, index) => (
+                        <span key={index}>{result.PID.$oid}</span>
+                      )).join(", ")}
                     </div>
                   </div>
-                  <Badge variant="secondary">{event.type}</Badge>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-2 pt-2">
-                  <p className="text-sm text-muted-foreground">{event.description}</p>
-                  <div className="text-sm">
-                    <span className="font-semibold">Location:</span> {event.location}
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
         </Accordion>
       </CardContent>
     </Card>
-  )
+  );
 }
-
