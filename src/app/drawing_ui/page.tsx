@@ -1,66 +1,96 @@
-"use client"; // Required for client-side functionality
-
+"use client"
 import { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 
 export default function CompetitionDraw() {
   const [groups, setGroups] = useState(
-    Array(16)
-      .fill(null)
-      .map(() => Array(3).fill("")) // Initialize with empty slots
+    Array(16).fill(null).map(() => Array(3).fill(""))
   );
+  const [connectionStatus, setConnectionStatus] = useState("connecting");
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
 
   useEffect(() => {
-    const ws = new WebSocket("ws://usae-ws.onrender.com/");
+    let ws : any;
+    let reconnectTimeout :any;
 
-    ws.onopen = () => {
-      console.log("WebSocket connection established");
-    };
+    const connectWebSocket = () => {
+      try {
+        ws = new WebSocket("https://usae-ws.onrender.com");
 
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      console.log("Received message:", message);
+        ws.onopen = () => {
+          console.log("WebSocket connection established");
+          setConnectionStatus("connected");
+          setRetryCount(0);
+        };
 
-      switch (message.type) {
-        case "INITIAL_DATA":
-        case "UPDATE_GROUPS":
-          setGroups(message.data);
-          break;
-        default:
-          console.warn("Unknown message type:", message.type);
+        ws.onmessage = (event: any) => {
+          try {
+            const message = JSON.parse(event.data);
+            console.log("Received message:", message);
+
+            switch (message.type) {
+              case "INITIAL_DATA":
+              case "UPDATE_GROUPS":
+                setGroups(message.data);
+                break;
+              default:
+                console.warn("Unknown message type:", message.type);
+            }
+          } catch (error) {
+            console.error("Error parsing message:", error);
+          }
+        };
+
+        ws.onerror = () => {
+          setConnectionStatus("error");
+          if (retryCount < MAX_RETRIES) {
+            reconnectTimeout = setTimeout(() => {
+              setRetryCount(prev => prev + 1);
+              connectWebSocket();
+            }, 3000);
+          }
+        };
+
+        ws.onclose = () => {
+          setConnectionStatus("disconnected");
+        };
+      } catch (error) {
+        console.error("WebSocket connection error:", error);
+        setConnectionStatus("error");
       }
     };
 
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
+    connectWebSocket();
 
     return () => {
-      ws.close();
+      if (ws) {
+        ws.close();
+      }
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
     };
-  }, []);
-
-  useEffect(() => {
-    console.log("Groups updated:", groups);
-  }, [groups]);
-
-  useEffect(() => {
-    document.body.style.backgroundColor = "#fcfcfc";
-    document.body.style.color = "#2d3955";
-  }, []);
+  }, [retryCount]);
 
   return (
-    <div className="min-h-screen bg-[#fcfcfc] text-[#2d3955] py-12">
+    <div className="min-h-screen bg-gray-50 text-gray-900 py-12">
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold mb-8 text-center">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#b49041] to-[#2d3955]">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-gray-800">
             USAE FOOTBALL CHAMPIONSHIP
           </span>
-          <div className="text-transparent bg-clip-text bg-gradient-to-r from-[#b49041] to-[#2d3955]">
+          <div className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-gray-800">
             GROUP STAGE DRAW
           </div>
         </h1>
+
+        {connectionStatus === "error" && retryCount >= MAX_RETRIES && (
+          <div className="mb-8 text-center p-4 bg-red-100 text-red-700 rounded-lg">
+            Unable to connect to the server. Please try refreshing the page.
+          </div>
+        )}
+
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
           {groups.map((group, groupIndex) => (
             <motion.div
@@ -68,29 +98,27 @@ export default function CompetitionDraw() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3, delay: groupIndex * 0.05 }}
+              className="bg-white rounded-lg shadow-lg border border-amber-600 hover:border-gray-800 transition-colors duration-300"
             >
-              <Card className="w-full bg-white border border-[#b49041] hover:border-[#2d3955] transition-colors duration-300 shadow-lg hover:shadow-[#b49041]/50">
-                <CardHeader className="bg-[#fcfcfc] rounded-t-lg p-3">
-                  <CardTitle className="text-lg font-semibold text-[#b49041]">
-                    Group {groupIndex + 1}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-3">
-                  {group.map((slot, slotIndex) => (
-                    <motion.div
-                      key={slotIndex}
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <div className="mb-2 bg-[#f0f0f0] border border-[#b49041] text-[#2d3955] font-medium rounded-md p-2 text-sm whitespace-normal break-words shadow-md">
-                        {slot || "Team"}
-                      </div>
-                    </motion.div>
-                  ))}
-                </CardContent>
-              </Card>
+              <div className="p-3 border-b border-amber-600">
+                <h3 className="text-lg font-semibold text-amber-600">
+                  Group {groupIndex + 1}
+                </h3>
+              </div>
+              <div className="p-3">
+                {group.map((slot, slotIndex) => (
+                  <motion.div
+                    key={slotIndex}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="mb-2 bg-gray-50 border border-amber-600 text-gray-800 font-medium rounded-md p-2 text-sm whitespace-normal break-words">
+                      {slot || "Team"}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </motion.div>
           ))}
         </div>
