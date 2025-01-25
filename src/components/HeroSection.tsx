@@ -25,14 +25,14 @@ const HeroSection = () => {
                 alt={`Slide ${index + 1}`}
                 layout="fill"
                 objectFit="cover"
-                className="rounded-lg shadow-md dark:opacity-50 opacity-7"
+                className="rounded-lg shadow-md dark:opacity-50 opacity-90"
                 priority
               />
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">
                 <h2 className="text-2xl md:text-4xl font-bold mb-3">
                   Welcome to USAE-EVENTS
                 </h2>
-                <p className="text-base md:text-lg dark:text-gray-200 text-gray-950">
+                <p className="text-base md:text-lg text-gray-200">
                   Discover amazing events, connect with people, and enjoy unforgettable experiences.
                 </p>
               </div>
