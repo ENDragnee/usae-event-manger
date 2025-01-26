@@ -80,7 +80,7 @@ export function MatchResultsGrid() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-centerhere h-64">
         <div className="text-gray-500">Loading matches...</div>
       </div>
     )
