@@ -1,100 +1,154 @@
-import React, { useEffect, useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Team = {
+  Group: string;
   id: string;
   name: string;
   played: number;
   won: number;
   drawn: number;
   lost: number;
-  goalsFor: number;
-  goalsAgainst: number;
+  gd: number;
   points: number;
 };
 
-const GroupTable: React.FC = () => {
-  const [selectedGroup, setSelectedGroup] = useState("Group A");
-  const [teams, setTeams] = useState<Team[]>([]);
+const GroupTable = () => {
+  const [selectedGroup, setSelectedGroup] = useState("A");
+  const [allTeams, setAllTeams] = useState<Team[]>([]);
+  const [displayedTeams, setDisplayedTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchAndFormatData = (data: any[]) => {
+    return data.map((team: any) => ({
+      id: team.UniID || String(Math.random()),
+      name: team.Name || "Unknown Team",
+      played: Number(team.played) || 0,
+      won: Number(team.won) || 0,
+      drawn: Number(team.drawn) || 0,
+      lost: Number(team.lost) || 0,
+      gd: Number(team.gd) || 0,
+      points: Number(team.points) || 0,
+      Group: team.Group || "A",
+    }));
+  };
 
   useEffect(() => {
-    const fetchGroupData = async () => {
+    const fetchInitialData = async () => {
       setLoading(true);
+      setError(null);
+
       try {
-        const response = await fetch(`/api/groups/${selectedGroup}`);
+        const response = await fetch("/api/groups", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
-        // Map the fetched data to the Team type if needed
-        const formattedData = data.map((team: any) => ({
-          id: team.UniID,
-          name: team.Name,
-          played: team.played,
-          won: team.win,
-          drawn: team.draw,
-          lost: team.lose,
-          goalsFor: team.gd, // Adjust to proper goals data
-          goalsAgainst: 0, // Add logic for goalsAgainst if available
-          points: parseInt(team.win) * 3 + parseInt(team.draw), // Calculate points
-        }));
-        setTeams(formattedData);
+        console.log("yazew", data)
+        const formattedData = fetchAndFormatData(data);
+        setAllTeams(formattedData);
       } catch (error) {
         console.error("Error fetching group data:", error);
+        setError(error instanceof Error ? error.message : "An error occurred");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchGroupData();
-  }, [selectedGroup]);
+    fetchInitialData();
+  }, []);
+
+  const handleGroupChange = (group: string) => {
+    setSelectedGroup(group);
+    const filteredTeams = allTeams.filter(team => 
+      team.Group?.toUpperCase().trim() === group.toUpperCase().trim()
+    );
+
+    const sortedTeams = filteredTeams.sort((a, b) => {
+      if (b.points !== a.points) {
+        return b.points - a.points;
+      }
+      return b.gd - a.gd;
+    });
+
+    setDisplayedTeams(sortedTeams);
+  };
+
+  useEffect(() => {
+    handleGroupChange(selectedGroup);
+  }, [allTeams, selectedGroup]);
 
   return (
-    <Tabs defaultValue="Group A" onValueChange={setSelectedGroup}>
-      <TabsList className="flex justify-center items-center">
-        <TabsTrigger value="Group A">Group A</TabsTrigger>
-        <TabsTrigger value="Group B">Group B</TabsTrigger>
-        <TabsTrigger value="Group C">Group C</TabsTrigger>
-      </TabsList>
+    <Tabs defaultValue="A" onValueChange={handleGroupChange}>
+      <div className="overflow-x-auto scrollbar-hide">
+        <TabsList className="flex gap-4 min-w-max px-4 md:justify-around mb-4">
+          {Array.from({ length: 16 }, (_, i) => (
+            <TabsTrigger
+              key={String.fromCharCode(65 + i)}
+              value={String.fromCharCode(65 + i)}
+              className="flex-grow sm:flex-grow-0"
+            >
+              Group {String.fromCharCode(65 + i)}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </div>
       <TabsContent value={selectedGroup}>
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
+        <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Team</TableHead>
-                <TableHead>P</TableHead>
-                <TableHead>W</TableHead>
-                <TableHead>D</TableHead>
-                <TableHead>L</TableHead>
-                <TableHead>GD</TableHead>
-                <TableHead>Pts</TableHead>
+                <TableHead className="w-[40%]">Team</TableHead>
+                <TableHead className="text-center">P</TableHead>
+                <TableHead className="text-center">W</TableHead>
+                <TableHead className="text-center">D</TableHead>
+                <TableHead className="text-center">L</TableHead>
+                <TableHead className="text-center">GD</TableHead>
+                <TableHead className="text-center">Pts</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {teams.map((team) => (
-                <TableRow key={team.id}>
-                  <TableCell>{team.name}</TableCell>
-                  <TableCell>{team.played}</TableCell>
-                  <TableCell>{team.won}</TableCell>
-                  <TableCell>{team.drawn}</TableCell>
-                  <TableCell>{team.lost}</TableCell>
-                  <TableCell>{team.goalsFor}</TableCell>
-                  <TableCell>{team.goalsAgainst}</TableCell>
-                  <TableCell>{team.points}</TableCell>
+              {loading ? (
+                Array.from({ length: 5 }).map((_, index) => (
+                  <TableRow key={index}>
+                    {Array.from({ length: 7 }).map((_, cellIndex) => (
+                      <TableCell key={cellIndex}>
+                        <div className="h-4 w-full bg-muted/30 animate-pulse rounded"></div>
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : displayedTeams.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center">
+                    No teams found in this group
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                displayedTeams.map((team) => (
+                  <TableRow key={team.id}>
+                    <TableCell>{team.name}</TableCell>
+                    <TableCell className="text-center">{team.played}</TableCell>
+                    <TableCell className="text-center">{team.won}</TableCell>
+                    <TableCell className="text-center">{team.drawn}</TableCell>
+                    <TableCell className="text-center">{team.lost}</TableCell>
+                    <TableCell className="text-center">{team.gd}</TableCell>
+                    <TableCell className="text-center">{team.points}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
-        )}
+        </div>
       </TabsContent>
     </Tabs>
   );

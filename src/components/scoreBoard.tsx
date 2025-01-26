@@ -9,15 +9,27 @@ import TaekwondoScoreBoard from "@/components/TaekwondoScoreBoard"
 
 const ScoreBoard = () => {
   return (
-    <div>
+    <div className="w-full overflow-x-auto">
       <Tabs defaultValue="Soccer" className="space-y-4">
-        <TabsList className="grid grid-cols-5 md:grid-cols-5 gap-4">
-          <TabsTrigger value="Soccer">Soccer</TabsTrigger>
-          <TabsTrigger value="Athletics">Athletics</TabsTrigger>
-          <TabsTrigger value="Chess">Chess</TabsTrigger>
-          <TabsTrigger value="Gebeta">Gebeta</TabsTrigger>
-          <TabsTrigger value="Taekwondo">Taekwondo</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto scrollbar-hide">
+          <TabsList className="flex gap-4 min-w-max px-4 md:justify-around">
+            <TabsTrigger value="Soccer" className="flex-shrink-0">
+              Soccer
+            </TabsTrigger>
+            <TabsTrigger value="Athletics" className="flex-shrink-0">
+              Athletics
+            </TabsTrigger>
+            <TabsTrigger value="Chess" className="flex-shrink-0">
+              Chess
+            </TabsTrigger>
+            <TabsTrigger value="Gebeta" className="flex-shrink-0">
+              Gebeta
+            </TabsTrigger>
+            <TabsTrigger value="Taekwondo" className="flex-shrink-0">
+              Taekwondo
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="Soccer" className="space-y-4">
           <SoccerScoreBoard />
