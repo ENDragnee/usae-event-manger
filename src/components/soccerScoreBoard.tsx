@@ -11,6 +11,8 @@ type Team = {
   drawn: number;
   lost: number;
   gd: number;
+  GoalAgainst: number;
+  GoalFor: number;
   points: number;
 };
 
@@ -32,14 +34,16 @@ const GroupTable = () => {
       gd: Number(team.gd) || 0,
       points: Number(team.points) || 0,
       Group: team.Group || "A",
+      GoalFor: Number(team.goalsFor) || 0,
+      GoalAgainst: Number(team.goalsAgainst) || 0,
     }));
-  };
+  };  
 
   useEffect(() => {
     const fetchInitialData = async () => {
       setLoading(true);
       setError(null);
-
+    
       try {
         const response = await fetch("/api/groups", {
           method: "GET",
@@ -47,13 +51,13 @@ const GroupTable = () => {
             "Content-Type": "application/json",
           },
         });
-
+    
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-
+    
         const data = await response.json();
-        console.log("yazew", data)
+        console.log("Fetched Data:", data); // Log fetched data
         const formattedData = fetchAndFormatData(data);
         setAllTeams(formattedData);
       } catch (error) {
@@ -62,7 +66,7 @@ const GroupTable = () => {
       } finally {
         setLoading(false);
       }
-    };
+    };    
 
     fetchInitialData();
   }, []);
@@ -113,6 +117,8 @@ const GroupTable = () => {
                 <TableHead className="text-center">D</TableHead>
                 <TableHead className="text-center">L</TableHead>
                 <TableHead className="text-center">GD</TableHead>
+                <TableHead className="text-center">GF</TableHead>
+                <TableHead className="text-center">GA</TableHead>
                 <TableHead className="text-center">Pts</TableHead>
               </TableRow>
             </TableHeader>
@@ -142,6 +148,8 @@ const GroupTable = () => {
                     <TableCell className="text-center">{team.drawn}</TableCell>
                     <TableCell className="text-center">{team.lost}</TableCell>
                     <TableCell className="text-center">{team.gd}</TableCell>
+                    <TableCell className="text-center">{team.GoalFor}</TableCell>
+                    <TableCell className="text-center">{team.GoalAgainst}</TableCell>
                     <TableCell className="text-center">{team.points}</TableCell>
                   </TableRow>
                 ))
