@@ -15,13 +15,13 @@ export function SearchAndFilter({ onFilterChange }: any) {
       </div>
       <div>
         <Label htmlFor="sport">Sport</Label>
-        <Select onValueChange={(value) => onFilterChange((prev:  any) => ({ ...prev, sport: value }))}>
+        <Select onValueChange={(value) => onFilterChange((prev:  any) => ({ ...prev, type: value }))}>
           <SelectTrigger id="sport">
             <SelectValue placeholder="Select sport" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Sports</SelectItem>
-            <SelectItem value="football">Football</SelectItem>
+            <SelectItem value="soccer">Football</SelectItem>
             <SelectItem value="chess">Chess</SelectItem>
             <SelectItem value="taekwondo">Taekwondo</SelectItem>
             <SelectItem value="athletics">Athletics</SelectItem>
@@ -36,8 +36,23 @@ export function SearchAndFilter({ onFilterChange }: any) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="playing">Pending</SelectItem>
             <SelectItem value="completed">Completed</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <Label htmlFor="day">Day</Label>
+        <Select onValueChange={(value) => onFilterChange((prev: any) => ({ ...prev, day: value }))}>
+          <SelectTrigger id="date">
+            <SelectValue placeholder="Select date" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Time</SelectItem>
+            {Array.from({ length: 12 }, (_, i) => {
+              const date = new Date(2025, 0, 26 + i).toISOString().split("T")[0]
+              return <SelectItem key={date} value={date}>{new Date(date).toDateString()}</SelectItem>
+            })} 
           </SelectContent>
         </Select>
       </div>

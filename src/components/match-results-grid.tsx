@@ -6,16 +6,26 @@ import { SearchAndFilter } from "./search-and-filter"
 import { MatchCardProps } from "@/types/Props"
 
 export function MatchResultsGrid() {
-  const [filters, setFilters] = useState({ type: "", status: "", search: "" })
+  const [filters, setFilters] = useState({ type: "", status: "", search: "" ,day:""})
   const [matches, setMatches] = useState<MatchCardProps[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchMatches() {
       try {
-        const response = await fetch('/api/matches')
-        const data = await response.json()
+        const response = await fetch('/api/matches')  
+        console.log("response status: ", response.status)
+
+        const text=await response.text();
+        console.log("response body:", text);
+        if(!response.ok){
+          throw new Error("failed to fetch matches");
+        }
+        const data = JSON.parse(text);
+        console.log(data)
+
         setMatches(data)
+        console.log(matches)
       } catch (error) {
         console.error('Failed to fetch matches:', error)
       } finally {
@@ -28,11 +38,18 @@ export function MatchResultsGrid() {
 
   const filteredMatches = matches.filter((match: MatchCardProps) => {
     const matchSearch: string = `${match.metadata.type} ${match.players?.map((player: { Name: string }) => player.Name).join(" ") || ""}`.toLowerCase()
-    
+   
+    const matchDate= match.metadata.date|| "";
+
+ 
+
+    const formattedDay=filters.day==="all"?"":filters.day;
     return (
-      (!filters.type || match.metadata.type.toLowerCase() === filters.type.toLowerCase()) &&
-      (!filters.status || match.Status.toLowerCase() === filters.status.toLowerCase()) &&
-      (!filters.search || matchSearch.includes(filters.search.toLowerCase()))
+      (filters.type==="all"||!filters.type || match.metadata.type.toLowerCase() === filters.type.toLowerCase()) &&
+      (filters.status==="all"||!filters.status || match.Status.toLowerCase() === filters.status.toLowerCase()) &&
+      (!filters.search || matchSearch.includes(filters.search.toLowerCase()))&&
+      (filters.day==="all"||!filters.day|| matchDate==filters.day )&&
+      (formattedDay ? matchDate===formattedDay:true)
     )
   })
 
