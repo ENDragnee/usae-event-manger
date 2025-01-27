@@ -126,7 +126,7 @@ const GroupTable = () => {
               {loading ? (
                 Array.from({ length: 5 }).map((_, index) => (
                   <TableRow key={index}>
-                    {Array.from({ length: 7 }).map((_, cellIndex) => (
+                    {Array.from({ length: 9 }).map((_, cellIndex) => (
                       <TableCell key={cellIndex}>
                         <div className="h-4 w-full bg-muted/30 animate-pulse rounded"></div>
                       </TableCell>

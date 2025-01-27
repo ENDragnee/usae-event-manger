@@ -66,7 +66,7 @@ export async function GET(request) {
       
         goalsFor += teamScore;
         goalsAgainst += opponentScore;
-      
+            
         if (teamScore > opponentScore) wins++;
         else if (teamScore < opponentScore) losses++;
         else draws++;

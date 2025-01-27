@@ -5,8 +5,15 @@ import "swiper/swiper-bundle.css"; // Import Swiper styles
 
 const HeroSection = () => {
   const images = [
+    "/images/img.jpg",
     "/images/festiv.png", // Replace with your image paths
     "/images/festival.png",
+    "/images/img1.jpg",
+    "/images/img2.jpg",
+    "/images/img3.jpg",
+    // "/images/img4.jpg",
+    // "/images/img5.jpg",
+    // "/images/img6.jpg",
   ];
 
   return (
@@ -25,7 +32,7 @@ const HeroSection = () => {
                 alt={`Slide ${index + 1}`}
                 layout="fill"
                 objectFit="cover"
-                className="rounded-lg shadow-md dark:opacity-50 opacity-90"
+                className="rounded-lg shadow-md dark:opacity-50 opacity-100"
                 priority
               />
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">

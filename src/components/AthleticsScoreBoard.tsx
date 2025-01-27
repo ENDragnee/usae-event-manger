@@ -1,73 +1,156 @@
+"use client"
+
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import TableSkeleton from "@/components/ui/TableSkeleton"
 
-type Athlete = {
-  id: number
-  name: string
-  event: string
-  result: string
-  rank: number
+type Match = {
+  _id: string
+  enrichedResults: {
+    playerName: string
+    score: string
+    isWinner: boolean
+    Status: string
+  }[]
+  metadata: {
+    type: string
+    date: string
+    startTime: string
+    endTime: string
+    distance: string
+  }
 }
 
-const athleticsData: Athlete[] = [
-  { id: 1, name: "John Doe", event: "100m", result: "9.98s", rank: 1 },
-  { id: 2, name: "Jane Smith", event: "100m", result: "10.12s", rank: 2 },
-  { id: 3, name: "Mike Johnson", event: "400m", result: "44.52s", rank: 1 },
-  { id: 4, name: "Sarah Brown", event: "400m", result: "45.01s", rank: 2 },
-  { id: 5, name: "Team USA", event: "4X100m", result: "37.45s", rank: 1 },
-  { id: 6, name: "Team Jamaica", event: "4X100m", result: "37.68s", rank: 2 },
-  { id: 7, name: "Team GB", event: "4X400m", result: "2:57.84", rank: 1 },
-  { id: 8, name: "Team Canada", event: "4X400m", result: "2:58.12", rank: 2 },
-  { id: 9, name: "David Miller", event: "1500m", result: "3:32.45", rank: 1 },
-  { id: 10, name: "Hassan Ali", event: "1500m", result: "3:32.98", rank: 2 },
-]
-
-const events = ["100m", "400m", "4X100m", "4X400m", "1500m"]
-
 const AthleticsScoreBoard: React.FC = () => {
-  const [selectedEvent, setSelectedEvent] = useState(events[0])
+  const [matches, setMatches] = useState<Match[]>([])
+  const [selectedDistance, setSelectedDistance] = useState<string>("")
+  const [availableDistances, setAvailableDistances] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const filteredData = athleticsData.filter((athlete) => athlete.event === selectedEvent)
+  useEffect(() => {
+    const fetchAthleticsData = async () => {
+      try {
+        setIsLoading(true)
+        const response = await fetch("/api/athletic")
+        if (!response.ok) {
+          throw new Error("Failed to fetch data")
+        }
+        const data: Match[] = await response.json()
+        setMatches(data)
+
+        // Extract unique distances from the data
+        const distances = [...new Set(data.map((match) => match.metadata.distance))]
+        setAvailableDistances(distances)
+
+        // Set initial selected distance
+        if (distances.length > 0 && !selectedDistance) {
+          setSelectedDistance(distances[0])
+        }
+      } catch (error) {
+        console.error("Error fetching athletics data:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchAthleticsData()
+  }, [selectedDistance]) // Added selectedDistance to the dependency array
+
+  // Filter matches based on selected distance
+  const filteredMatches = selectedDistance
+    ? matches.filter((match) => match.metadata.distance === selectedDistance)
+    : matches
+
+  // sorting logic
+  const timeToSeconds = (time: string) => {
+    const [hours, minutes, seconds] = time.split(":").map(Number)
+    return hours * 3600 + minutes * 60 + seconds
+  }
 
   return (
-    <div className="space-y-4">
-      <Select onValueChange={setSelectedEvent} defaultValue={selectedEvent}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select event" />
-        </SelectTrigger>
-        <SelectContent>
-          {events.map((event) => (
-            <SelectItem key={event} value={event}>
-              {event}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <div className="space-y-8">
+      <div className="flex items-center gap-4">
+        <Select onValueChange={setSelectedDistance} value={selectedDistance}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select distance" />
+          </SelectTrigger>
+          <SelectContent>
+            {["100m", "200m", "400m", "4x100m", "4x400m", "800m", "1500m", "3000m"].map((distance, index) => (
+              <SelectItem key={`distance-${distance}-${index}`} value={distance}>
+                {distance}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <span className="text-sm text-gray-500">Showing {filteredMatches.length} matches</span>
+      </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Rank</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Event</TableHead>
-            <TableHead>Result</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredData.map((athlete) => (
-            <TableRow key={athlete.id}>
-              <TableCell>{athlete.rank}</TableCell>
-              <TableCell>{athlete.name}</TableCell>
-              <TableCell>{athlete.event}</TableCell>
-              <TableCell>{athlete.result}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      {isLoading ? (
+        <Card className="bg-secondary/5">
+          <CardHeader>
+            <CardTitle>Loading...</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TableSkeleton />
+          </CardContent>
+        </Card>
+      ) : filteredMatches.length === 0 ? (
+        <Card className="bg-secondary/5">
+          <CardContent className="p-6">
+            <p className="text-center text-gray-500">No matches found for the selected distance</p>
+          </CardContent>
+        </Card>
+      ) : (
+        filteredMatches.map((match, index) => (
+          <Card key={match._id} className={`overflow-hidden ${index % 2 === 0 ? "bg-primary/5" : "bg-secondary/5"}`}>
+            <CardHeader>
+              <CardTitle>
+                {match.metadata.distance} - {new Date(match.metadata.date).toLocaleDateString()}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">Position</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Result</TableHead>
+                    <TableHead className="text-right">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {match.enrichedResults
+                    .sort((a, b) => timeToSeconds(a.score) - timeToSeconds(b.score))
+                    .map((result, idx) => (
+                      <TableRow key={`${match._id}-${result.playerName}-${idx}`}>
+                        <TableCell className="font-medium">{idx + 1}</TableCell>
+                        <TableCell>{result.playerName}</TableCell>
+                        <TableCell>{result.score}</TableCell>
+                        <TableCell className="text-right">
+                          {result.Status === "Eliminated" ? (
+                            <span className="dark:bg-red-500 bg-red-400 text-red-100 px-3 py-1 rounded-xl">
+                              Eliminated
+                            </span>
+                          ) : (
+                            <span className="dark:bg-green-500 bg-green-400 text-green-100 px-6 py-1 rounded-xl">
+                              Passed
+                            </span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        ))
+      )}
     </div>
   )
 }
 
 export default AthleticsScoreBoard
+
