@@ -24,7 +24,7 @@ export function SearchAndFilter({ onFilterChange }: any) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
       {/* Search Field */}
-      <div>
+      {/* <div>
         <Label htmlFor="search">Search</Label>
         <Input
           id="search"
@@ -36,7 +36,7 @@ export function SearchAndFilter({ onFilterChange }: any) {
             }))
           }
         />
-      </div>
+      </div> */}
 
       {/* Sport Filter */}
       <div>

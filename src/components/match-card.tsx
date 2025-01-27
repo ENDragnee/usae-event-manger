@@ -22,7 +22,9 @@ interface MatchCardProps {
     teams?: string[];
     event?: string;
     status: string;
-    result?: string; // Add the result property here
+    result?: string;
+    gender?: string; // Add the result property here
+    distance?: string; // Add the result property here
   };
   onResultSubmit: (matchId: string, result: any) => void;
 }
@@ -67,30 +69,50 @@ export function MatchCard({ match, onResultSubmit }: MatchCardProps) {
     setRankedRunners(updatedRunners)
   }
 
-  const handleAthleticsSubmit = (e : any) => {
-    e.preventDefault()
+  const handleAthleticsSubmit = async (e: any) => {
+    e.preventDefault();
+
     if (rankedRunners.length === match.players.length) {
-      // Verify all runners have times
-      const allHaveTimes = rankedRunners.every(runner => runner.time)
+      const allHaveTimes = rankedRunners.every((runner) => runner.time);
       if (!allHaveTimes) {
-        alert("Please enter times for all runners")
-        return
+        alert("Please enter times for all runners");
+        return;
       }
 
+      // Prepare the results with updated statuses
       const finalResults = rankedRunners.map((runner, index) => ({
         PID: runner.PID,
         score: runner.time,
-        position: index + 1,
-        isWinner: index === 0
-      }))
-      onResultSubmit(match.id, finalResults)
-      setIsExpanded(false)
-      toast({
-        title: "Result submitted successfully",
-        description: "The match result has been recorded.",
-      })
+        status: index < 4 ? "Pending" : "Eliminated", // Top 4: Pending, others: Eliminated
+      }));
+
+      // Update database via API route
+      try {
+        const res = await fetch(`/api/update-status/athlete`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ matchId: match.id, results: finalResults, gender: match.gender, distance: match.distance }),
+        });
+
+        if (res.ok) {
+          onResultSubmit(match.id, finalResults);
+          toast({
+            title: "Result submitted successfully",
+            description: "The match result has been recorded.",
+          });
+          setIsExpanded(false);
+        } else {
+          throw new Error("Failed to update status");
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "An error occurred while updating statuses.",
+          variant: "destructive",
+        });
+      }
     }
-  }
+  };
 
   const handleReset = () => {
     setRankedRunners([])
@@ -212,7 +234,7 @@ export function MatchCard({ match, onResultSubmit }: MatchCardProps) {
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">
-          {match.date} {match.startTime}
+          {match.date} {match.startTime} {match?.gender} {match?.distance} {match.type[0]}
         </p>
         <p className="font-medium">
           {match.teams ? match.teams.join(" vs ") : match.players ? match.players.join(" vs ") : match.event}

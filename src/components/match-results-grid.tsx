@@ -102,7 +102,9 @@ export function MatchResultsGrid() {
               startTime: match.metadata.startTime,
               endTime: match.metadata.endTime,
               status: match.Status,
-              result: match.Result
+              result: match.Result,
+              distance: match.metadata.distance,
+              gender: match.metadata.gender
             }} 
             onResultSubmit={handleResultSubmit} 
           />
