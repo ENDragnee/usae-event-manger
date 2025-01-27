@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import { MatchCard } from "./match-card"
 import { SearchAndFilter } from "./search-and-filter"
 import { MatchCardProps } from "@/types/Props"
+import { signOut } from 'next-auth/react';
+import { Button } from "@/components/ui/button"
 
 export function MatchResultsGrid() {
   const [filters, setFilters] = useState({ type: "", status: "", search: "" ,day:""})
@@ -88,6 +90,9 @@ export function MatchResultsGrid() {
 
   return (
     <div className="space-y-4">
+      <Button onClick={() => signOut()} className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+        Sign Out
+      </Button>
       <SearchAndFilter onFilterChange={setFilters} />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredMatches.map((match: MatchCardProps) => (

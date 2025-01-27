@@ -35,13 +35,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
         <ThemeProvider>
+        <main className="flex-grow">
           <header className="fixed top-4 right-8 z-40 flex items-center justify-between shadow-md">
             <ThemeToggle />
           </header>
-          {children}
+          {children}   
+        </main>
+        <footer className="relative bottom-0 left-0 right-0 p-4 border-t border-[#cccccc] dark:border-blue-300 text-center shadow-lg">
+          <p className="text-base font-medium">
+            &copy; ASCII Technologies <span className="text-[#b8860b]">2024</span>
+          </p>
+        </footer>
         </ThemeProvider>
       </body>
     </html>
