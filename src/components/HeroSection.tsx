@@ -20,7 +20,7 @@ const HeroSection = () => {
     <div className="flex flex-col items-center text-center mb-10">
       <Swiper
         modules={[Autoplay, Pagination]}
-        autoplay={{ delay: 4000 }} // Auto slide every 3 seconds
+        autoplay={{ delay: 4000 }} // Auto slide every 4 seconds
         pagination={{ clickable: true }} // Enable clickable pagination
         className="relative w-full h-40 md:h-96"
       >
@@ -28,12 +28,12 @@ const HeroSection = () => {
           <SwiperSlide key={index}>
             <div className="relative w-full h-full">
               <Image
-                src={src}
+                src={src} // Use the current image from the array
                 alt={`Slide ${index + 1}`}
                 layout="fill"
                 objectFit="cover"
                 className="rounded-lg shadow-md dark:opacity-50 opacity-100"
-                priority
+                priority={index === 0} // Set priority for the first image
               />
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">
                 <h2 className="text-2xl md:text-4xl font-bold mb-3">
