@@ -4,6 +4,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Roboto } from "next/font/google"
+import SearchBar from "@/components/searchBar";
+import Link from "next/link";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -39,7 +41,9 @@ export default function RootLayout({
       >
         <ThemeProvider>
         <main className="flex-grow">
-          <header className="fixed top-4 right-8 z-40 flex items-center justify-between shadow-md">
+          <header className="w-[90%] flex flex-col justify-between sm:flex-row my-6 mx-auto sm:mb-10 gap-4 sm:gap-0">
+            <Link href={"/"}><h1 className={`text-2xl sm:text-3xl font-bold dark:text-white ${roboto.variable}`}>USAE-EVENTS</h1></Link>
+            <SearchBar />
             <ThemeToggle />
           </header>
           {children}   

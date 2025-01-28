@@ -3,6 +3,7 @@
 import * as React from "react";
 import { FaMoon, FaSun } from "react-icons/fa"
 import { useTheme } from "@/components/ThemeProvider"
+import { IoMdSunny } from "react-icons/io";
 
 
 
@@ -23,11 +24,11 @@ export function ThemeToggle() {
   return (
     <button
     onClick={handleToggleTheme}
-    className="rounded-full p-2 text-sm transition-all"
+    className="rounded-full text-sm transition-all bg-transparent"
     aria-label={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
     >
     {theme === "light" ? (
-        <FaSun className="text-xl text-yellow-300" />
+        <IoMdSunny className="text-xl text-yellow-300" />
     ) : (
         <FaMoon className="text-xl text-white -rotate-12" />
     )}

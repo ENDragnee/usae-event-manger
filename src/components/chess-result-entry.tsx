@@ -2,7 +2,6 @@
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Dispatch, SetStateAction } from "react";
 
 interface ChessResultInputProps {
   match: {
@@ -19,18 +18,27 @@ export function ChessResultInput({ match, setResult }: ChessResultInputProps) {
       onValueChange={(value) => {
         const resultObj = [
           {
-            winner: value === "win1" ? match.players[0] : value === "win2" ? match.players[1] : "draw",
+            isWinner: value === "win1",
+            player: match.players[0],
             PID: {
-              $oid: value === "win1" ? match.playersId[0] : value === "win2" ? match.playersId[1] : "draw",
+              $oid: match.playersId[0],
             },
           },
           {
-            loser: value === "win1" ? match.players[1] : value === "win2" ? match.players[0] : "draw",
+            isWinner: value === "win2",
+            player: match.players[1],
             PID: {
-              $oid: value === "win1" ? match.playersId[1] : value === "win2" ? match.playersId[0] : "draw",
+              $oid: match.playersId[1],
             },
           },
         ];
+
+        // If it's a draw, set both players' `isWinner` to false
+        if (value === "draw") {
+          resultObj[0].isWinner = false;
+          resultObj[1].isWinner = false;
+        }
+
         setResult(resultObj);
       }}
     >

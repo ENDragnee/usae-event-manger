@@ -1,50 +1,100 @@
-import type React from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+'use client';
+import { useEffect, useState } from "react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import TableSkeleton from "@/components/ui/TableSkeleton"
 
 type ChessPlayer = {
-  id: number
-  name: string
-  rating: number
-  wins: number
-  losses: number
-  draws: number
-  points: number
+  _id: string;
+  UniID: string;
+  Name: string;
+  rating: number;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  points: number;
+  winPercentage: number;
 }
 
-const chessData: ChessPlayer[] = [
-  { id: 1, name: "Magnus Carlsen", rating: 2847, wins: 5, losses: 0, draws: 2, points: 6 },
-  { id: 2, name: "Ding Liren", rating: 2788, wins: 4, losses: 1, draws: 2, points: 5 },
-  { id: 3, name: "Ian Nepomniachtchi", rating: 2795, wins: 3, losses: 2, draws: 2, points: 4 },
-  { id: 4, name: "Alireza Firouzja", rating: 2785, wins: 2, losses: 3, draws: 2, points: 3 },
-]
+const ChessScoreBoard = () => {
+  const [players, setPlayers] = useState<ChessPlayer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-const ChessScoreBoard: React.FC = () => {
+  useEffect(() => {
+    const fetchChessData = async () => {
+      try {
+        const response = await fetch('/api/chess'); // Adjust the API endpoint as needed
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const data = await response.json();
+        setPlayers(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchChessData();
+  }, []);
+
+  if (isLoading) {
+    return <div className="text-center p-4">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500 p-4">Error: {error}</div>;
+  }
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Rating</TableHead>
-          <TableHead>Wins</TableHead>
-          <TableHead>Losses</TableHead>
-          <TableHead>Draws</TableHead>
-          <TableHead>Points</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {chessData.map((player) => (
-          <TableRow key={player.id}>
-            <TableCell>{player.name}</TableCell>
-            <TableCell>{player.rating}</TableCell>
-            <TableCell>{player.wins}</TableCell>
-            <TableCell>{player.losses}</TableCell>
-            <TableCell>{player.draws}</TableCell>
-            <TableCell>{player.points}</TableCell>
+    <div className="overflow-x-auto">
+      {isLoading ? (
+        <Card className="bg-secondary/5">
+        <CardHeader>
+          <CardTitle>Loading...</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TableSkeleton />
+        </CardContent>
+      </Card>
+      ) :
+      (<Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="whitespace-nowrap">Rank</TableHead>
+            <TableHead className="whitespace-nowrap">Name</TableHead>
+            <TableHead className="whitespace-nowrap">Rating</TableHead>
+            <TableHead className="whitespace-nowrap">Played</TableHead>
+            <TableHead className="whitespace-nowrap">Won</TableHead>
+            <TableHead className="whitespace-nowrap">Drawn</TableHead>
+            <TableHead className="whitespace-nowrap">Lost</TableHead>
+            <TableHead className="whitespace-nowrap">Points</TableHead>
+            <TableHead className="whitespace-nowrap">Win %</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  )
-}
+        </TableHeader>
+        <TableBody>
+          {players.map((player, index) => (
+            <TableRow key={player._id}>
+              <TableCell>{index + 1}</TableCell>
+              <TableCell>{player.Name}</TableCell>
+              <TableCell>{player.rating}</TableCell>
+              <TableCell>{player.played}</TableCell>
+              <TableCell>{player.won}</TableCell>
+              <TableCell>{player.drawn}</TableCell>
+              <TableCell>{player.lost}</TableCell>
+              <TableCell>{player.points}</TableCell>
+              <TableCell>{player.winPercentage}%</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>)
+      }
 
-export default ChessScoreBoard
+    </div>
+  );
+};
+
+export default ChessScoreBoard;

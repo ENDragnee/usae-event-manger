@@ -21,13 +21,16 @@ type Match = {
     startTime: string
     endTime: string
     distance: string
+    gender: string
   }
 }
 
 const AthleticsScoreBoard: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([])
   const [selectedDistance, setSelectedDistance] = useState<string>("")
+  const [selectedGender, setSelectedGender] = useState<string>("")
   const [availableDistances, setAvailableDistances] = useState<string[]>([])
+  const [availableGenders, setAvailableGenders] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -41,13 +44,19 @@ const AthleticsScoreBoard: React.FC = () => {
         const data: Match[] = await response.json()
         setMatches(data)
 
-        // Extract unique distances from the data
+        // Extract unique distances and genders from the data
         const distances = [...new Set(data.map((match) => match.metadata.distance))]
+        const genders = [...new Set(data.map((match) => match.metadata.gender))]
+        
         setAvailableDistances(distances)
+        setAvailableGenders(genders)
 
-        // Set initial selected distance
+        // Set initial selected values
         if (distances.length > 0 && !selectedDistance) {
           setSelectedDistance(distances[0])
+        }
+        if (genders.length > 0 && !selectedGender) {
+          setSelectedGender(genders[0])
         }
       } catch (error) {
         console.error("Error fetching athletics data:", error)
@@ -57,14 +66,15 @@ const AthleticsScoreBoard: React.FC = () => {
     }
 
     fetchAthleticsData()
-  }, [selectedDistance]) // Added selectedDistance to the dependency array
+  }, [selectedDistance, selectedGender])
 
-  // Filter matches based on selected distance
-  const filteredMatches = selectedDistance
-    ? matches.filter((match) => match.metadata.distance === selectedDistance)
-    : matches
+  // Filter matches based on selected distance and gender
+  const filteredMatches = matches.filter((match) => {
+    const matchesDistance = !selectedDistance || match.metadata.distance === selectedDistance
+    const matchesGender = !selectedGender || match.metadata.gender === selectedGender
+    return matchesDistance && matchesGender
+  })
 
-  // sorting logic
   const timeToSeconds = (time: string) => {
     const [hours, minutes, seconds] = time.split(":").map(Number)
     return hours * 3600 + minutes * 60 + seconds
@@ -85,6 +95,20 @@ const AthleticsScoreBoard: React.FC = () => {
             ))}
           </SelectContent>
         </Select>
+
+        <Select onValueChange={setSelectedGender} value={selectedGender}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select gender" />
+          </SelectTrigger>
+          <SelectContent>
+            {["Male", "Female"].map((gender, index) => (
+              <SelectItem key={`gender-${gender}-${index}`} value={gender}>
+                {gender}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
         <span className="text-sm text-gray-500">Showing {filteredMatches.length} matches</span>
       </div>
 
@@ -100,7 +124,7 @@ const AthleticsScoreBoard: React.FC = () => {
       ) : filteredMatches.length === 0 ? (
         <Card className="bg-secondary/5">
           <CardContent className="p-6">
-            <p className="text-center text-gray-500">No matches found for the selected distance</p>
+            <p className="text-center text-gray-500">No matches found for the selected filters</p>
           </CardContent>
         </Card>
       ) : (
@@ -108,7 +132,7 @@ const AthleticsScoreBoard: React.FC = () => {
           <Card key={match._id} className={`overflow-hidden ${index % 2 === 0 ? "bg-primary/5" : "bg-secondary/5"}`}>
             <CardHeader>
               <CardTitle>
-                {match.metadata.distance} - {new Date(match.metadata.date).toLocaleDateString()}
+                {match.metadata.distance} ({match.metadata.gender}) - {new Date(match.metadata.date).toLocaleDateString()}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -153,4 +177,3 @@ const AthleticsScoreBoard: React.FC = () => {
 }
 
 export default AthleticsScoreBoard
-
