@@ -44,7 +44,7 @@ export async function POST(request) {
     const playerGroups = [];
     for (let i = 0; i < pendingPlayers.length; i += 8) {
       const group = pendingPlayers.slice(i, i + 8);
-      if (group.length === 8) { // Only create matches for complete groups of 8
+      if (group.length <= 8) { // Only create matches for complete groups of 8
         playerGroups.push(group);
       }
     }

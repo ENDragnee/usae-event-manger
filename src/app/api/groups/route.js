@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/db";
 import { ObjectId } from "mongodb";
 
-export async function GET(request) {
+export async function GET() {
   try {
     const client = await clientPromise;
     const db = client.db("usae-sport");

@@ -22,6 +22,7 @@ const GroupTable = () => {
   const [displayedTeams, setDisplayedTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"league" | "tournament">("league");
 
   const fetchAndFormatData = (data: any[]) => {
     return data.map((team: any) => ({
@@ -91,74 +92,137 @@ const GroupTable = () => {
     handleGroupChange(selectedGroup);
   }, [allTeams, selectedGroup]);
 
-  return (
-    <Tabs defaultValue="A" onValueChange={handleGroupChange}>
-      <div className="overflow-x-auto scrollbar-hide">
-        <TabsList className="flex gap-4 min-w-max px-4 md:justify-around mb-4">
-          {Array.from({ length: 16 }, (_, i) => (
-            <TabsTrigger
-              key={String.fromCharCode(65 + i)}
-              value={String.fromCharCode(65 + i)}
-              className="flex-grow sm:flex-grow-0"
-            >
-              Group {String.fromCharCode(65 + i)}
-            </TabsTrigger>
+  const TournamentBracket = () => (
+    <div className="p-4">
+      <div className="flex justify-between items-start gap-8 overflow-x-auto">
+        {/* Round of 16 */}
+        <div className="flex flex-col gap-4">
+          <h3 className="text-sm font-semibold">Round of 16</h3>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="border dark:border-cyan-50 p-2 w-40 rounded-lg">
+              <div className="border-b dark:border-cyan-50 pb-1 mb-1">Team A</div>
+              <div>Team B</div>
+            </div>
           ))}
-        </TabsList>
-      </div>
-      <TabsContent value={selectedGroup}>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[40%]">Team</TableHead>
-                <TableHead className="text-center">P</TableHead>
-                <TableHead className="text-center">W</TableHead>
-                <TableHead className="text-center">D</TableHead>
-                <TableHead className="text-center">L</TableHead>
-                <TableHead className="text-center">GD</TableHead>
-                <TableHead className="text-center">GF</TableHead>
-                <TableHead className="text-center">GA</TableHead>
-                <TableHead className="text-center">Pts</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                Array.from({ length: 5 }).map((_, index) => (
-                  <TableRow key={index}>
-                    {Array.from({ length: 9 }).map((_, cellIndex) => (
-                      <TableCell key={cellIndex}>
-                        <div className="h-4 w-full bg-muted/30 animate-pulse rounded"></div>
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : displayedTeams.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center">
-                    No teams found in this group
-                  </TableCell>
-                </TableRow>
-              ) : (
-                displayedTeams.map((team) => (
-                  <TableRow key={team.id}>
-                    <TableCell>{team.name}</TableCell>
-                    <TableCell className="text-center">{team.played}</TableCell>
-                    <TableCell className="text-center">{team.won}</TableCell>
-                    <TableCell className="text-center">{team.drawn}</TableCell>
-                    <TableCell className="text-center">{team.lost}</TableCell>
-                    <TableCell className="text-center">{team.gd}</TableCell>
-                    <TableCell className="text-center">{team.GoalFor}</TableCell>
-                    <TableCell className="text-center">{team.GoalAgainst}</TableCell>
-                    <TableCell className="text-center">{team.points}</TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
         </div>
-      </TabsContent>
-    </Tabs>
+
+        {/* Quarter Finals */}
+        <div className="flex flex-col gap-4 mt-32">
+          <h3 className="text-sm font-semibold">Quarter Finals</h3>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="border dark:border-cyan-50 p-2 w-40 rounded-lg">
+              <div className="border-b dark:border-cyan-50 pb-1 mb-1">Winner R16 {i*2 + 1}</div>
+              <div>Winner R16 {i*2 + 2}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Semi Finals */}
+        <div className="flex flex-col gap-4 mt-52">
+          <h3 className="text-sm font-semibold">Semi Finals</h3>
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="border dark:border-cyan-50 p-2 w-40 rounded-lg">
+              <div className="border-b dark:border-cyan-50 pb-1 mb-1">Winner QF {i*2 + 1}</div>
+              <div>Winner QF {i*2 + 2}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Final */}
+        <div className="flex flex-col gap-4 mt-64">
+          <h3 className="text-sm font-semibold">Final</h3>
+          <div className="border dark:border-cyan-50 p-2 w-40 rounded-lg">
+            <div className="border-b dark:border-cyan-50 pb-1 mb-1">Winner SF 1</div>
+            <div>Winner SF 2</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      <select
+        value={viewMode}
+        onChange={(e) => setViewMode(e.target.value as "league" | "tournament")}
+        className="mb-4 p-2 border rounded dark:bg-inherit"
+      >
+        <option value="league" className="bg-inherit  mx">League View</option>
+        <option value="tournament" className="bg-inherit">Tournament View</option>
+      </select>
+
+      {viewMode === "league" ? (
+        <Tabs defaultValue="A" onValueChange={handleGroupChange}>
+          <div className="overflow-x-auto scrollbar-hide">
+            <TabsList className="flex gap-4 min-w-max px-4 md:justify-around mb-4">
+              {Array.from({ length: 15 }, (_, i) => (
+                <TabsTrigger
+                  key={String.fromCharCode(65 + i)}
+                  value={String.fromCharCode(65 + i)}
+                  className="flex-grow sm:flex-grow-0"
+                >
+                  Group {String.fromCharCode(65 + i)}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+          <TabsContent value={selectedGroup}>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[40%]">Team</TableHead>
+                    <TableHead className="text-center">P</TableHead>
+                    <TableHead className="text-center">W</TableHead>
+                    <TableHead className="text-center">D</TableHead>
+                    <TableHead className="text-center">L</TableHead>
+                    <TableHead className="text-center">GD</TableHead>
+                    <TableHead className="text-center">GF</TableHead>
+                    <TableHead className="text-center">GA</TableHead>
+                    <TableHead className="text-center">Pts</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    Array.from({ length: 5 }).map((_, index) => (
+                      <TableRow key={index}>
+                        {Array.from({ length: 9 }).map((_, cellIndex) => (
+                          <TableCell key={cellIndex}>
+                            <div className="h-4 w-full bg-muted/30 animate-pulse rounded"></div>
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : displayedTeams.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center">
+                        No teams found in this group
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    displayedTeams.map((team) => (
+                      <TableRow key={team.id}>
+                        <TableCell>{team.name}</TableCell>
+                        <TableCell className="text-center">{team.played}</TableCell>
+                        <TableCell className="text-center">{team.won}</TableCell>
+                        <TableCell className="text-center">{team.drawn}</TableCell>
+                        <TableCell className="text-center">{team.lost}</TableCell>
+                        <TableCell className="text-center">{team.gd}</TableCell>
+                        <TableCell className="text-center">{team.GoalFor}</TableCell>
+                        <TableCell className="text-center">{team.GoalAgainst}</TableCell>
+                        <TableCell className="text-center">{team.points}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <TournamentBracket />
+      )}
+    </div>
   );
 };
 
