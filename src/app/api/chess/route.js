@@ -39,7 +39,7 @@ export async function GET(request) {
       let wins = 0;
       let draws = 0;
       let losses = 0;
-      const totalGames = playerMatches.length;
+      const totalGames = playerMatches.length + 4;
       const rating = parseInt(player.rating) || 1500;
 
       playerMatches.forEach((match) => {
@@ -69,18 +69,21 @@ export async function GET(request) {
         }
       });
 
-      const points = wins + draws * 0.5;
+      const points = (wins + (draws * 0.5) + player.Score) || 0;
       const winPercentage = totalGames > 0 ? ((points / totalGames) * 100).toFixed(1) : 0;
 
       return {
         _id: player._id,
         UniID: player.UniID,
         Name: player.Name,
-        rating: rating,
+        rating: player.gender,
         played: totalGames,
-        won: wins,
-        drawn: draws,
-        lost: losses,
+        // won: wins,
+        won: Math.floor(((points * winPercentage)/100)) + wins,
+        drawn: (totalGames - (Math.floor(((points * winPercentage)/100)) + wins + Math.floor(((totalGames - (points * winPercentage)/100))) + losses)) + draws,
+        // drawn: draws,
+        lost: Math.floor(((totalGames - (points * winPercentage)/100))) + losses,
+        // lost: losses,
         points: points,
         winPercentage: parseFloat(winPercentage),
       };

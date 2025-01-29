@@ -77,18 +77,17 @@ const taekwondoData: TaekwondoAthlete[] = [
 ]
 
 const TaekwondoTable = () => {
-  const [selectedGender, setSelectedGender] = useState<'all' | 'male' | 'female'>('all')
-  const [selectedWeightClass, setSelectedWeightClass] = useState<'all' | WeightClass>('all')
+  const [selectedGender, setSelectedGender] = useState<'all' | 'male' | 'female'>('male')
+  const [selectedWeightClass, setSelectedWeightClass] = useState<'all' | WeightClass>('54kg-m')
+
 
   const filteredAthletes = taekwondoData.filter(athlete => {
     if (selectedGender !== 'all' && athlete.gender !== selectedGender) return false
     if (selectedWeightClass !== 'all' && athlete.weightClass !== selectedWeightClass) return false
     return true
   }).sort((a, b) => {
-    // First sort by weight class
     if (a.weightClass < b.weightClass) return -1
     if (a.weightClass > b.weightClass) return 1
-    // Then by ranking within weight class
     return a.ranking - b.ranking
   })
 
