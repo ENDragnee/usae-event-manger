@@ -92,53 +92,98 @@ const GroupTable = () => {
     handleGroupChange(selectedGroup);
   }, [allTeams, selectedGroup]);
 
-  const TournamentBracket = () => (
-    <div className="p-4">
-      <div className="flex justify-between items-start gap-8 overflow-x-auto">
-        {/* Round of 16 */}
-        <div className="flex flex-col gap-4">
-          <h3 className="text-sm font-semibold">Round of 16</h3>
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="border dark:border-cyan-50 p-2 w-40 rounded-lg">
-              <div className="border-b dark:border-cyan-50 pb-1 mb-1">Team A</div>
-              <div>Team B</div>
-            </div>
-          ))}
+  const TournamentBracket = () => {
+    const [matches, setMatches] = useState({
+      round16: [],
+      quarterFinals: [],
+      semiFinals: [],
+      final: [],
+    });
+    const [loading, setLoading] = useState(true);
+  
+    useEffect(() => {
+      const fetchMatches = async () => {
+        try {
+          const [round16, quarterFinals, semiFinals, final] = await Promise.all([
+            fetch('/api/tournament/1').then(res => res.json()),
+            fetch('/api/tournament/2').then(res => res.json()),
+            fetch('/api/tournament/3').then(res => res.json()),
+            fetch('/api/tournament/4').then(res => res.json()),
+          ]);
+  
+          setMatches({
+            round16,
+            quarterFinals,
+            semiFinals,
+            final,
+          });
+        } catch (error) {
+          console.error('Error fetching tournament matches:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchMatches();
+    }, []);
+  
+    const renderMatch = (match: any) => (
+      <div key={match.id} className="border dark:border-cyan-50 p-2 w-40 rounded-lg">
+          <div className={`border-b dark:border-cyan-50 pb-1 mb-1 ${
+            match.status === "Completed" 
+              ? match.result?.isWinner?.[0] 
+                ? "text-green-500" 
+                : "text-red-500"
+              : ""
+          }`}>
+            {match.players[0]?.name || 'TBD'}
+          </div>
+          <div className={`${
+            match.status === "Completed"
+              ? match.result?.isWinner?.[1]
+                ? "text-green-500"
+                : "text-red-500"
+              : ""
+          }`}>
+            {match.players[1]?.name || 'TBD'}
+          </div>
         </div>
-
-        {/* Quarter Finals */}
-        <div className="flex flex-col gap-4 mt-32">
-          <h3 className="text-sm font-semibold">Quarter Finals</h3>
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="border dark:border-cyan-50 p-2 w-40 rounded-lg">
-              <div className="border-b dark:border-cyan-50 pb-1 mb-1">Winner R16 {i*2 + 1}</div>
-              <div>Winner R16 {i*2 + 2}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Semi Finals */}
-        <div className="flex flex-col gap-4 mt-52">
-          <h3 className="text-sm font-semibold">Semi Finals</h3>
-          {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="border dark:border-cyan-50 p-2 w-40 rounded-lg">
-              <div className="border-b dark:border-cyan-50 pb-1 mb-1">Winner QF {i*2 + 1}</div>
-              <div>Winner QF {i*2 + 2}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Final */}
-        <div className="flex flex-col gap-4 mt-64">
-          <h3 className="text-sm font-semibold">Final</h3>
-          <div className="border dark:border-cyan-50 p-2 w-40 rounded-lg">
-            <div className="border-b dark:border-cyan-50 pb-1 mb-1">Winner SF 1</div>
-            <div>Winner SF 2</div>
+    );
+  
+    if (loading) {
+      return <div className="p-4">Loading tournament bracket...</div>;
+    }
+  
+    return (
+      <div className="p-4">
+        <div className="flex justify-between items-start gap-8 overflow-x-auto">
+          {/* Round of 16 */}
+          <div className="flex flex-col gap-4">
+            <h3 className="text-sm font-semibold">Round of 16</h3>
+            {matches.round16.map(renderMatch)}
+          </div>
+  
+          {/* Quarter Finals */}
+          <div className="flex flex-col gap-4 mt-32">
+            <h3 className="text-sm font-semibold">Quarter Finals</h3>
+            {matches.quarterFinals.map(renderMatch)}
+          </div>
+  
+          {/* Semi Finals */}
+          <div className="flex flex-col gap-4 mt-52">
+            <h3 className="text-sm font-semibold">Semi Finals</h3>
+            {matches.semiFinals.map(renderMatch)}
+          </div>
+  
+          {/* Final */}
+          <div className="flex flex-col gap-4 mt-64">
+            <h3 className="text-sm font-semibold">Final</h3>
+            {matches.final.map(renderMatch)}
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div>

@@ -10,10 +10,13 @@ export async function POST(request) {
         
         // Get players with specified status and type Football
         const players = await db.collection("Players")
-            .find({ 
-                Status: status,
-                Type: "Football"
-            }).toArray();
+        .find({
+            Status: status,
+            Type: "Football"
+        })
+        .sort({ Group: 1 }) // Sort by Group in ascending order
+        .toArray();
+    
 
         // Check if we have even number of players
         if(players.length % 2 !== 0) {
