@@ -27,8 +27,8 @@ type Match = {
 
 const AthleticsScoreBoard: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([])
-  const [selectedDistance, setSelectedDistance] = useState<string>("")
-  const [selectedGender, setSelectedGender] = useState<string>("")
+  const [selectedDistance, setSelectedDistance] = useState<string>("100m")
+  const [selectedGender, setSelectedGender] = useState<string>("Male")
   const [availableDistances, setAvailableDistances] = useState<string[]>([])
   const [availableGenders, setAvailableGenders] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -83,7 +83,7 @@ const AthleticsScoreBoard: React.FC = () => {
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-4">
-        <Select onValueChange={setSelectedDistance} value={selectedDistance}>
+        <Select onValueChange={(value) => setSelectedDistance(value)} defaultValue="100m">
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select distance" />
           </SelectTrigger>
@@ -96,16 +96,13 @@ const AthleticsScoreBoard: React.FC = () => {
           </SelectContent>
         </Select>
 
-        <Select onValueChange={setSelectedGender} value={selectedGender}>
+        <Select onValueChange={(value) => setSelectedGender(value)} defaultValue="Male">
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select gender" />
+            <SelectValue placeholder="Select Gender" />
           </SelectTrigger>
           <SelectContent>
-            {["Male", "Female"].map((gender, index) => (
-              <SelectItem key={`gender-${gender}-${index}`} value={gender}>
-                {gender}
-              </SelectItem>
-            ))}
+            <SelectItem value="Male">Male</SelectItem>
+            <SelectItem value="Female">Female</SelectItem>
           </SelectContent>
         </Select>
 

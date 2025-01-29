@@ -58,7 +58,6 @@ const GroupTable = () => {
         }
     
         const data = await response.json();
-        console.log("Fetched Data:", data); // Log fetched data
         const formattedData = fetchAndFormatData(data);
         setAllTeams(formattedData);
       } catch (error) {

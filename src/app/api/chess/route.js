@@ -76,7 +76,7 @@ export async function GET(request) {
         _id: player._id,
         UniID: player.UniID,
         Name: player.Name,
-        rating: player.gender,
+        gender: player.gender,
         played: totalGames,
         // won: wins,
         won: Math.floor(((points * winPercentage)/100)) + wins,
