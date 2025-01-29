@@ -21,6 +21,7 @@ export async function GET() {
       .find({
         $and: [
           { "metadata.type": "soccer" },
+          { "metadata.phase": "league" },
           { Status: "Completed" }
         ],
       })
