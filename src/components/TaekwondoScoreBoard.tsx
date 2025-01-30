@@ -1,4 +1,8 @@
 import { useState } from "react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import Image from "next/image";
+import { ImageError } from "next/dist/server/image-optimizer";
 
 type WeightClass = 
   | "62kg-f" | "46kg-f" | "67kg-f" | "68kg-m" 
@@ -80,7 +84,6 @@ const TaekwondoTable = () => {
   const [selectedGender, setSelectedGender] = useState<'all' | 'male' | 'female'>('male')
   const [selectedWeightClass, setSelectedWeightClass] = useState<'all' | WeightClass>('54kg-m')
 
-
   const filteredAthletes = taekwondoData.filter(athlete => {
     if (selectedGender !== 'all' && athlete.gender !== selectedGender) return false
     if (selectedWeightClass !== 'all' && athlete.weightClass !== selectedWeightClass) return false
@@ -102,9 +105,9 @@ const TaekwondoTable = () => {
 
   const getRankingColor = (ranking: number) => {
     switch(ranking) {
-      case 1: return "bg-yellow-100"
-      case 2: return "bg-gray-100"
-      case 3: return "bg-orange-100"
+      case 1: return "bg-yellow-100 dark:bg-yellow-600"
+      case 2: return "bg-gray-100 dark:bg-gray-400"
+      case 3: return "bg-orange-100 dark:bg-orange-300"
       default: return ""
     }
   }
@@ -112,71 +115,73 @@ const TaekwondoTable = () => {
   return (
     <div className="p-4 space-y-4">
       <div className="flex space-x-4">
-        <select 
-          value={selectedGender}
-          onChange={(e) => {
-            setSelectedGender(e.target.value as 'all' | 'male' | 'female')
-            setSelectedWeightClass('all')
-          }}
-          className="block w-full max-w-xs p-2 border rounded-md"
-        >
-          <option value="all">All Athletes</option>
-          <option value="male">Male Athletes</option>
-          <option value="female">Female Athletes</option>
-        </select>
+        {/* Gender Select */}
+        <Select onValueChange={(value) => setSelectedGender(value as 'all' | 'male' | 'female')} defaultValue="all">
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select Gender" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="male">Male</SelectItem>
+            <SelectItem value="female">Female</SelectItem>
+          </SelectContent>
+        </Select>
 
-        <select 
+        {/* Weight Class Select */}
+        <Select 
+          onValueChange={(value) => setSelectedWeightClass(value as 'all' | WeightClass)} 
           value={selectedWeightClass}
-          onChange={(e) => setSelectedWeightClass(e.target.value as 'all' | WeightClass)}
-          className="block w-full max-w-xs p-2 border rounded-md"
         >
-          <option value="all">All Weight Classes</option>
-          {displayWeightClasses.map(weightClass => (
-            <option key={weightClass} value={weightClass}>
-              {weightClass.toUpperCase()}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select Weight Class" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Weight Classes</SelectItem>
+            {displayWeightClasses.map(weightClass => (
+              <SelectItem key={weightClass} value={weightClass}>
+                {weightClass.toUpperCase()}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Weight Class
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                University
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Ranking
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredAthletes.map((athlete) => (
-              <tr key={athlete.id} className={getRankingColor(athlete.ranking)}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {athlete.name}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {athlete.weightClass.toUpperCase()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {athlete.university}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  #{athlete.ranking}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <div className="space-y-6"> {/* Increased vertical spacing between tables */}
+      {Object.entries(
+        filteredAthletes.reduce((acc, athlete) => {
+          const key = athlete.weightClass;
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(athlete);
+          return acc;
+        }, {} as Record<string, TaekwondoAthlete[]>)
+      ).map(([weightClass, athletes]) => (
+        <div key={weightClass} className="rounded-lg border shadow-sm overflow-hidden"> {/* Added border and rounding */}
+          <div className="bg-gray-50 dark:bg-gray-700 p-2 font-medium"> {/* Header for weight class */}
+            {weightClass.toUpperCase()} Category
+          </div>
+          <Table className="min-w-full">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Weight Class</TableHead>
+                <TableHead>University</TableHead>
+                <TableHead>Ranking</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {athletes.map((athlete) => (
+                <TableRow key={athlete.id}>
+                  <TableCell>{athlete.name}</TableCell>
+                  <TableCell>{athlete.weightClass.toUpperCase()}</TableCell>
+                  <TableCell>{athlete.university}</TableCell>
+                  <TableCell>{athlete.ranking == 1 ? (<Image src="/images/medal.png" alt={"gold medal"} width={30} height={30}/>) : (athlete.ranking === 2 ? (<Image src={"/images/silver.png"} alt={"silver medal"} width={30} height={30}/>) : (<Image src={"/images/bronze.png"} alt={"bronze medal"} width={30} height={30}/>))}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      ))}
+    </div>
     </div>
   )
 }

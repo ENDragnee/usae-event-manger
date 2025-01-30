@@ -6,11 +6,13 @@ import "swiper/swiper-bundle.css"; // Import Swiper styles
 const HeroSection = () => {
   const images = [
     "/images/img.jpg",
-    "/images/festiv.png", // Replace with your image paths
-    "/images/festival.png",
     "/images/img1.jpg",
     "/images/img2.jpg",
     "/images/img3.jpg",
+    "/images/img4.jpg", // Replace with your image paths
+    "/images/img5.jpg",
+    "/images/img6.jpg",
+    "/images/img7.jpg",
   ];
 
   return (

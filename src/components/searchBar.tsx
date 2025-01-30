@@ -58,11 +58,11 @@ export default function SearchComponent() {
           value={playerId}
           onChange={(e) => setPlayerId(e.target.value)}
           placeholder="Enter Player ID"
-          className="bg-transparent border border-gray-400 text-black dark:text-white rounded-lg px-1.5 md:px-6 py-1 outline-none"
+          className="bg-transparent border focus:border-gray-400 border-gray-700 text-black dark:text-white rounded-lg px-4 md:px-6 py-1 outline-none"
         />
         <button
           onClick={handleSearch}
-          className="bg-transparent border border-gray-400 dark:text-white px-2 py-1 rounded-lg hover:bg-gray-500 hover:text-white"  
+          className="bg-transparent border focus:border-gray-400 border-gray-700 dark:text-white px-2 py-1 rounded-lg hover:bg-gray-500 hover:text-white"  
         >
           Search
         </button>

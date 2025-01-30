@@ -60,14 +60,14 @@ const ChessScoreBoard = () => {
     <div className="overflow-x-auto">
       <div className="flex justify-end mb-4">
       <Select onValueChange={(value) => setSelectedGender(value)} defaultValue="Male">
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select Gender" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Male">Male</SelectItem>
-            <SelectItem value="Female">Female</SelectItem>
-          </SelectContent>
-        </Select>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Select Gender" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="Male">Male</SelectItem>
+          <SelectItem value="Female">Female</SelectItem>
+        </SelectContent>
+      </Select>
       </div>
 
       {isLoading ? (
