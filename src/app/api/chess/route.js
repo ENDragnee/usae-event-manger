@@ -39,7 +39,8 @@ export async function GET(request) {
       let wins = 0;
       let draws = 0;
       let losses = 0;
-      const totalGames = playerMatches.length + 4;
+      const currCount = 6;
+      const totalGames = playerMatches.length + currCount;
       const rating = parseInt(player.rating) || 1500;
 
       playerMatches.forEach((match) => {
