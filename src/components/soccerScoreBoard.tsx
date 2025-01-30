@@ -130,21 +130,23 @@ const GroupTable = () => {
       <div key={match.id} className="border dark:border-cyan-50 p-2 w-40 rounded-lg">
           <div className={`border-b dark:border-cyan-50 pb-1 mb-1 ${
             match.status === "Completed" 
-              ? match.result?.isWinner?.[0] 
+              ? match.result[0]?.isWinner 
                 ? "text-green-500" 
                 : "text-red-500"
               : ""
           }`}>
-            {match.players[0]?.name || 'TBD'}
+            {match.players[0]?.name || 'TBD'}:
+            {match.result[0]?.score || 'TBD'}
           </div>
           <div className={`${
             match.status === "Completed"
-              ? match.result?.isWinner?.[1]
-                ? "text-green-500"
-                : "text-red-500"
-              : ""
+            ? match.result[1]?.isWinner
+            ? "text-green-500"
+            : "text-red-500"
+            : ""
           }`}>
-            {match.players[1]?.name || 'TBD'}
+            {match.players[1]?.name || 'TBD'}:
+            {match.result[1]?.score || 'TBD'}
           </div>
         </div>
     );
